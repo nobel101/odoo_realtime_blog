@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Browser That Wouldn't Stop Asking</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a1a;
+    --ink-muted: #6b6b6b;
+    --ink-faint: #999;
+    --paper: #faf9f7;
+    --paper-warm: #f3f0eb;
+    --accent: #2563a8;
+    --accent-soft: #eef4fb;
+    --accent-border: #c3d9f0;
+    --code-bg: #f4f2ef;
+    --border: #e8e4de;
+    --serif: 'Lora', Georgia, serif;
+    --sans: 'Source Sans 3', system-ui, sans-serif;
+    --max: 680px;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    line-height: 1.82;
+    font-size: 19px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: #0d1b2e;
+    color: var(--paper);
+    padding: 88px 24px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 59px,
+      rgba(255,255,255,0.03) 59px,
+      rgba(255,255,255,0.03) 60px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 59px,
+      rgba(255,255,255,0.03) 59px,
+      rgba(255,255,255,0.03) 60px
+    );
+  }
+  .hero > * { position: relative; z-index: 1; }
+  .hero .kicker {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #5b9bd5;
+    margin-bottom: 22px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(30px, 5.5vw, 50px);
+    font-weight: 600;
+    line-height: 1.18;
+    max-width: 660px;
+    margin: 0 auto 22px;
+  }
+  .hero .subtitle {
+    font-family: var(--sans);
+    font-size: 17px;
+    font-weight: 300;
+    color: #94a3b8;
+    max-width: 500px;
+    margin: 0 auto 40px;
+    line-height: 1.65;
+  }
+  .hero .byline {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: #64748b;
+    letter-spacing: 0.04em;
+  }
+  .hero .byline span { color: #94a3b8; }
+
+  /* ── Article ── */
+  article {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 68px 24px 100px;
+  }
+
+  p { margin-bottom: 1.55em; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 27px;
+    font-weight: 600;
+    line-height: 1.28;
+    margin: 2.6em 0 0.7em;
+    color: var(--ink);
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 2.2em 0 0.5em;
+  }
+
+  em { font-style: italic; }
+  strong { font-weight: 600; }
+
+  blockquote {
+    border-left: 3px solid var(--accent);
+    padding: 2px 0 2px 28px;
+    margin: 2.2em 0;
+    font-style: italic;
+    font-size: 22px;
+    color: #2a2a2a;
+    line-height: 1.55;
+  }
+
+  /* ── Timeline ── */
+  .timeline {
+    border-left: 2px solid var(--border);
+    margin: 2.4em 0 2.4em 12px;
+    padding-left: 0;
+  }
+  .tl-item {
+    display: flex;
+    gap: 20px;
+    padding: 0 0 28px 32px;
+    position: relative;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--paper);
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  .tl-item.dim::before { background: var(--border); box-shadow: 0 0 0 2px var(--border); }
+  .tl-year {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+    min-width: 44px;
+    padding-top: 2px;
+  }
+  .tl-item.dim .tl-year { color: var(--ink-faint); }
+  .tl-body {
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+    color: #444;
+  }
+  .tl-body strong { color: var(--ink); }
+
+  /* ── Scene box ── */
+  .scene {
+    background: var(--paper-warm);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 26px 30px;
+    margin: 2.2em 0;
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.72;
+    color: #444;
+  }
+  .scene .scene-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 12px;
+  }
+  .scene code {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    background: rgba(0,0,0,0.07);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #222;
+  }
+
+  /* ── Code blocks ── */
+  .code-wrap {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 1.8em 0;
+  }
+  .code-header {
+    background: #1e293b;
+    color: #94a3b8;
+    padding: 9px 18px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .code-lang {
+    background: rgba(91,155,213,0.18);
+    color: #5b9bd5;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+  }
+  pre {
+    background: #0d1b2e;
+    color: #cbd5e1;
+    padding: 22px 26px;
+    overflow-x: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 13.5px;
+    line-height: 1.8;
+    margin: 0;
+  }
+  pre .comment { color: #4a6280; font-style: italic; }
+  pre .kw { color: #7dd3fc; }
+  pre .fn { color: #93c5fd; }
+  pre .str { color: #86efac; }
+  pre .num { color: #fca5a5; }
+  pre .prop { color: #e2e8f0; }
+  pre .op { color: #94a3b8; }
+
+  /* ── Callout ── */
+  .callout {
+    display: flex;
+    gap: 18px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin: 2em 0;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 17px; flex-shrink: 0; margin-top: 2px; }
+  .callout p {
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+    color: #1e3a5f;
+    margin: 0;
+  }
+  .callout strong { color: #0f2340; }
+
+  /* ── Comparison ── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 2em 0;
+  }
+  .compare-col {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .compare-head {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 10px 16px;
+  }
+  .compare-head.old { background: #fef3f2; color: #9a3412; border-bottom: 1px solid #fecaca; }
+  .compare-head.new { background: #f0fdf4; color: #166534; border-bottom: 1px solid #bbf7d0; }
+  .compare-body {
+    padding: 14px 16px;
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.7;
+    color: #444;
+  }
+  .compare-body li { margin-left: 16px; margin-bottom: 4px; }
+
+  /* ── Divider ── */
+  .divider {
+    text-align: center;
+    margin: 3.2em 0;
+    color: var(--border);
+    letter-spacing: 0.4em;
+    font-size: 14px;
+  }
+
+  /* ── Annotation (inline aside) ── */
+  .aside {
+    float: right;
+    clear: right;
+    width: 200px;
+    margin: 0 0 1em 2em;
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-muted);
+    border-top: 2px solid var(--accent);
+    padding-top: 8px;
+  }
+
+  /* ── Footer ── */
+  footer {
+    background: #0d1b2e;
+    color: #475569;
+    text-align: center;
+    padding: 52px 24px;
+    font-family: var(--sans);
+    font-size: 13px;
+    line-height: 1.85;
+  }
+  footer strong { color: #94a3b8; }
+
+  @media (max-width: 520px) {
+    .compare { grid-template-columns: 1fr; }
+    .aside { float: none; width: 100%; margin: 0 0 1.5em; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="kicker">Networking · Web Frameworks · Odoo Internals</div>
+  <h1>The Browser That Wouldn't Stop Asking</h1>
+  <p class="subtitle">How a fundamental limitation of HTTP forced the web to reinvent itself — and how Odoo quietly rebuilt its entire real-time layer around the solution.</p>
+  <div class="byline"><span>12 min read</span> &nbsp;·&nbsp; Long polling · WebSockets · im_bus · Odoo 16</div>
+</div>
+
+<article>
+
+  <p>In 2004, if you wanted to know whether a new email had arrived in your Gmail inbox, your browser had to ask. It couldn't be told. It couldn't listen. It could only ask — and so it did, every few seconds, in a loop, forever.</p>
+
+  <p>This wasn't a bug. It was the entire design of the web.</p>
+
+  <p>HTTP, the protocol that carries every web page you've ever loaded, was built around a simple idea borrowed from postal mail: you send a request, you receive a response, the connection closes. Clean, stateless, scalable. Perfect for fetching documents. Completely wrong for a world where software needs to push events to users in real time.</p>
+
+  <p>Twenty years later, Odoo — one of the world's most widely deployed ERP systems — quietly completed a multi-version journey through every stage of that evolution. Understanding <em>why</em> it made those changes, and <em>how</em> it implemented them, means understanding one of the more interesting chapters in the history of web networking.</p>
+
+  <div class="divider">· · ·</div>
+
+  <h2>The Stateless Contract</h2>
+
+  <p>To understand the problem, you have to go back to the protocol itself.</p>
+
+  <p>HTTP was designed by Tim Berners-Lee in 1989 as a way to link and serve documents across a network. The model was elegantly simple: a client sends a request, a server sends a response. When the response is delivered, the connection is finished. The server has no memory of the client. The client has no persistent relationship with the server. Every interaction starts from zero.</p>
+
+  <p>This statelessness was a feature, not a limitation. It made servers massively scalable — you could handle thousands of clients without keeping any state for any of them. It made caching trivial. It made the protocol fault-tolerant; if a request failed, you just sent it again.</p>
+
+  <blockquote>The web was designed to serve documents. Nobody told it that one day it would need to run a live chat window inside an inventory management system.</blockquote>
+
+  <p>For most of the 1990s, this was fine. Websites were documents. You loaded a page, you read it, you clicked a link, you loaded another page. The request-response cycle was the entire user experience.</p>
+
+  <p>Then came web applications. And with them, a question the protocol had no answer for: what if the server needs to tell the client something that the client didn't ask about?</p>
+
+  <div class="divider">· · ·</div>
+
+  <h2>The Polling Era: When the Browser Became a Pest</h2>
+
+  <p>The first solution was brute force. If the browser can only receive information by asking, make it ask constantly.</p>
+
+  <p>This technique — called <strong>short polling</strong> — was the standard approach for any application that needed live updates through the early 2000s. A JavaScript timer would fire every few seconds, send an HTTP request to the server, and check for new data. If there was something new, render it. If not, throw away the response and wait for the next timer tick.</p>
+
+  <div class="scene">
+    <div class="scene-label">Short polling in practice — circa 2003</div>
+    <code>setInterval(function() {</code><br>
+    <code>&nbsp;&nbsp;fetch('/check-for-new-messages')</code><br>
+    <code>&nbsp;&nbsp;&nbsp;&nbsp;.then(r => r.json())</code><br>
+    <code>&nbsp;&nbsp;&nbsp;&nbsp;.then(data => { if (data.messages.length) render(data); });</code><br>
+    <code>}, 3000);</code><br><br>
+    This fires 20 requests per minute, per browser tab, per user.<br>
+    With 500 concurrent users: <strong>10,000 HTTP requests per minute</strong> — most returning an empty response.
+  </div>
+
+  <p>The waste was staggering. For every useful response containing actual new data, dozens of empty responses were discarded. Each request carried a full HTTP overhead: headers, TCP handshake costs, server-side processing to check the database. At any meaningful user count, the server spent most of its CPU answering the question "anything new?" with "no."</p>
+
+  <p>But for a long time, this was the only option. The web had no other model.</p>
+
+  <div class="divider">· · ·</div>
+
+  <h2>The Comet Trick: Holding the Line Open</h2>
+
+  <p>Sometime around 2006, developers started noticing something interesting about HTTP. While the protocol specified that connections should close after a response, nothing in the TCP layer <em>required</em> them to. A server could technically start sending a response and then just... not finish it. Hold the connection open. Send more data when it became available.</p>
+
+  <p>Alex Russell, a developer at Dojo Toolkit, wrote a blog post in 2006 naming this pattern <strong>Comet</strong> — a riff on Ajax, as in another household cleaning product. The name stuck.</p>
+
+  <p>The elegant variant of this approach was called <strong>long polling</strong>. Instead of the browser asking every three seconds and getting a response immediately, the browser would ask once — and the server would hold the request open, doing nothing, until either new data arrived or a timeout occurred. When data arrived, the server would flush the response. The browser would immediately open a new long-poll request. And the cycle would continue.</p>
+
+  <div class="scene">
+    <div class="scene-label">The long-poll conversation</div>
+    Browser → Server: "Anything new?"<br>
+    Server: <em>(holds connection, waits... waits... waits...)</em><br>
+    <em>30 seconds later, a new chat message arrives:</em><br>
+    Server → Browser: "Yes, here it is." <em>(connection closes)</em><br>
+    Browser → Server: "Anything new?" <em>(immediately re-opens)</em><br><br>
+    Result: Near-real-time delivery. One active connection instead of a polling storm.
+  </div>
+
+  <p>This was genuinely clever. The number of requests dropped dramatically. Latency — the gap between an event occurring on the server and the browser learning about it — dropped from several seconds to near-zero. All of this without changing the HTTP protocol at all.</p>
+
+  <p>But long polling was a hack. It worked against the design of the protocol rather than with it. Servers had to keep a thread or process alive for each waiting connection. Load balancers would sometimes kill connections they thought had stalled. Proxies would buffer responses and refuse to forward them until the connection closed. The whole arrangement was fragile in ways that were hard to predict and harder to debug.</p>
+
+  <div class="divider">· · ·</div>
+
+  <h2>The Year the Protocol Finally Changed</h2>
+
+  <p>In 2011, the IETF published RFC 6455: <em>The WebSocket Protocol</em>.</p>
+
+  <p>It was a proper, standardized solution to the problem that Comet had been patching over for five years. WebSocket defined a handshake mechanism — built on top of a regular HTTP upgrade request — that converted an existing TCP connection from the HTTP model into a persistent, full-duplex channel. Once the handshake was complete, either side could send a message at any time, in either direction, with minimal overhead.</p>
+
+  <div class="timeline">
+    <div class="tl-item dim">
+      <div class="tl-year">1989</div>
+      <div class="tl-body">HTTP invented at CERN. Request → Response → Close. The stateless web is born.</div>
+    </div>
+    <div class="tl-item dim">
+      <div class="tl-year">1995</div>
+      <div class="tl-body">JavaScript arrives. The browser gains logic. Web pages start needing live data.</div>
+    </div>
+    <div class="tl-item dim">
+      <div class="tl-year">2003</div>
+      <div class="tl-body"><strong>Short polling</strong> becomes standard practice. Browsers hammer servers every few seconds.</div>
+    </div>
+    <div class="tl-item dim">
+      <div class="tl-year">2006</div>
+      <div class="tl-body">Alex Russell names <strong>Comet / long polling</strong>. The server holds connections open — a clever abuse of HTTP.</div>
+    </div>
+    <div class="tl-item dim">
+      <div class="tl-year">2009</div>
+      <div class="tl-body">Google Wave demonstrates full real-time collaboration. WebSocket spec begins serious development.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">2011</div>
+      <div class="tl-body"><strong>RFC 6455 published.</strong> WebSocket is a real protocol. Browsers start shipping it by default.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">2013</div>
+      <div class="tl-body">All major browsers fully support WebSocket. The hack era is over — for those who adopt it.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-year">2022</div>
+      <div class="tl-body"><strong>Odoo 16</strong> ships with WebSocket as the default transport. Long polling becomes the fallback.</div>
+    </div>
+  </div>
+
+  <p>The key innovation in WebSocket wasn't the persistent connection — long polling had that. It was the <strong>framing protocol</strong>. Where long polling sent complete HTTP responses and had to re-establish the connection each time, WebSocket sent lightweight frames. A single frame could be as small as 2 bytes of overhead. The TCP connection stayed open indefinitely, maintained by periodic ping/pong heartbeat frames. The server could push a message to the browser at any moment — no waiting, no request needed.</p>
+
+  <div class="divider">· · ·</div>
+
+  <h2>Where Odoo Was During All of This</h2>
+
+  <p>Odoo — known as OpenERP until 2014 — was not a web application in its early years. It was a thick-client GTK desktop application that happened to have a web interface bolted on. Real-time communication was not a design concern when your interface was a native window that could hold a persistent connection to the server however it liked.</p>
+
+  <p>The shift happened gradually as Odoo committed fully to the browser as its primary interface. And with that shift came the problem every web developer eventually faces: how do you tell the browser that something happened?</p>
+
+  <p>For years, the answer was the one everyone else was using. Poll the server. The Odoo client would ping endpoints on a timer, checking for new messages, pending activities, and system notifications. It worked well enough at small scale — a few dozen users, a quiet server, a forgiving network.</p>
+
+  <p>But Odoo was being deployed at larger and larger scales. And at scale, polling has a physics problem: the number of requests grows linearly with your user count. A deployment with 500 concurrent users generates as many empty polling requests per minute as a deployment with 50 users generates useful ones.</p>
+
+  <div class="divider">· · ·</div>
+
+  <h2>The Architecture of im_bus: Designing for Decoupling</h2>
+
+  <p>Before Odoo could adopt WebSockets, it needed something more fundamental: a proper internal event system. The transport layer — whether long polling or WebSocket — would be meaningless without a coherent way for any part of the application to say "something happened," and for any connected client to receive that message.</p>
+
+  <p>The answer was the <code>im_bus</code> module, and its central model: <code>bus.bus</code>.</p>
+
+  <p>The design philosophy was straightforward: make the bus a database table, not an in-memory queue. This was a deliberate choice that traded raw performance for reliability and architectural simplicity. Any Odoo server process — a web worker, a cron job, a background task — can publish an event by inserting a row into <code>bus_bus</code>. No inter-process communication required. No shared memory. No message broker to manage. Just a database write.</p>
+
+  <div class="callout">
+    <div class="callout-icon">◈</div>
+    <p>Using PostgreSQL as the message queue was a pragmatic choice. Odoo already required PostgreSQL. Every server process already had a database connection. The consistency guarantees of a transactional database meant that events could never be silently lost — if the write committed, the event existed.</p>
+  </div>
+
+  <p>But a database table alone doesn't push anything. Something still needs to notice when new rows appear and forward them to connected clients. This is where Odoo used one of PostgreSQL's most underused features: <code>LISTEN</code> and <code>NOTIFY</code>.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">PostgreSQL LISTEN/NOTIFY — the wakeup mechanism <span class="code-lang">SQL</span></div>
+    <pre><span class="comment">-- The bus worker runs this once on startup:</span>
+<span class="kw">LISTEN</span> <span class="str">im_bus_notification</span>;
+
+<span class="comment">-- When any process writes to bus_bus, it triggers:</span>
+<span class="kw">NOTIFY</span> <span class="str">im_bus_notification</span>;
+
+<span class="comment">-- The LISTEN connection wakes up immediately.
+-- No polling. No sleep loop. Pure event-driven wakeup.</span></pre>
+  </div>
+
+  <p>The effect is elegant. The bus worker process maintains a dedicated PostgreSQL connection that does nothing except wait for a <code>NOTIFY</code> signal. When any part of the application writes a message to <code>bus_bus</code>, it fires a <code>NOTIFY</code>. The sleeping worker wakes up, reads the new rows, and pushes them to the appropriate connected clients. The worker then goes back to sleep. Zero wasted CPU between events.</p>
+
+  <div class="divider">· · ·</div>
+
+  <h2>Long Polling on Top of im_bus</h2>
+
+  <p>With <code>im_bus</code> in place, the long-polling implementation became straightforward. The browser would send a request to <code>/web/bus/poll</code>, passing the ID of the last message it had seen. The server would check whether any newer messages existed for the client's subscribed channels. If not, it would hold the HTTP connection open — waiting on the PostgreSQL LISTEN connection — until either a new message arrived or a timeout (typically 50 seconds) expired.</p>
+
+  <div class="scene">
+    <div class="scene-label">The long-poll request lifecycle in Odoo</div>
+    1. Browser → <code>POST /web/bus/poll</code> with <code>{"last": 48291, "channels": ["mail.channel/7", "partner#42"]}</code><br>
+    2. Server checks <code>bus_bus</code> for rows with <code>id &gt; 48291</code> matching those channels → nothing found<br>
+    3. Server suspends the HTTP response; LISTEN connection sleeps<br>
+    4. Another user sends a chat message → <code>bus_bus</code> row inserted → <code>NOTIFY</code> fires<br>
+    5. Server wakes, reads new row, flushes HTTP response with the message<br>
+    6. Browser receives message, immediately re-issues <code>POST /web/bus/poll</code> with <code>{"last": 48292, ...}</code>
+  </div>
+
+  <p>This was a substantial improvement over dumb polling. But it still had the fundamental problem of long polling: every connected client occupied a server thread waiting on an HTTP connection. In a standard synchronous Python web server, threads are expensive. An Odoo deployment with 200 simultaneous users meant 200 threads doing nothing but waiting.</p>
+
+  <p>Odoo worked around this by using <strong>gevent</strong> — a Python library that uses cooperative multitasking to handle thousands of concurrent connections on a small number of OS threads. A gevent-based Odoo worker could manage hundreds of waiting long-poll connections efficiently. But this required a separate server process, careful configuration, and still had ceiling it couldn't break through cleanly.</p>
+
+  <div class="divider">· · ·</div>
+
+  <h2>Odoo 16: The WebSocket Migration</h2>
+
+  <p>By the time Odoo 16 was in development, WebSockets had been stable and universally supported for nearly a decade. The question was no longer whether to use them — it was how to integrate them cleanly into an existing architecture without breaking the applications already built on top of im_bus.</p>
+
+  <p>The answer was to treat the WebSocket as a transport layer, not as a replacement for the bus. The <code>im_bus</code> channel system stayed exactly the same. Module developers continued to publish events the same way. The only thing that changed was the pipe connecting the browser to the bus worker.</p>
+
+  <div class="compare">
+    <div class="compare-col">
+      <div class="compare-head old">Before Odoo 16 — Long Poll</div>
+      <div class="compare-body">
+        <ul>
+          <li>New HTTP connection every ~50 seconds</li>
+          <li>Full request headers on each reconnect</li>
+          <li>Server thread occupied while waiting</li>
+          <li>Proxy timeouts can kill idle connections</li>
+          <li>Gevent required for scale</li>
+        </ul>
+      </div>
+    </div>
+    <div class="compare-col">
+      <div class="compare-head new">Odoo 16+ — WebSocket</div>
+      <div class="compare-body">
+        <ul>
+          <li>One connection per tab, held indefinitely</li>
+          <li>2-byte frame overhead per message</li>
+          <li>Async worker handles thousands of connections</li>
+          <li>Ping/pong heartbeat detects dead connections</li>
+          <li>Falls back to long poll if WS fails</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <p>The WebSocket handshake in Odoo begins as a regular HTTP request. The browser sends an <code>Upgrade: websocket</code> header. The server responds with <code>101 Switching Protocols</code>. From that moment, the TCP connection no longer speaks HTTP — it speaks the WebSocket frame protocol. The Odoo session, authentication, and channel subscriptions are all handled in the first few frames after the upgrade.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">WebSocket handshake — what actually travels on the wire <span class="code-lang">HTTP/1.1</span></div>
+    <pre><span class="comment">Browser sends:</span>
+<span class="prop">GET</span> <span class="str">/websocket</span> HTTP/1.1
+<span class="prop">Host:</span> odoo.company.com
+<span class="prop">Upgrade:</span> websocket
+<span class="prop">Connection:</span> Upgrade
+<span class="prop">Sec-WebSocket-Key:</span> dGhlIHNhbXBsZSBub25jZQ==
+<span class="prop">Sec-WebSocket-Version:</span> 13
+
+<span class="comment">Server responds:</span>
+HTTP/1.1 <span class="num">101</span> Switching Protocols
+<span class="prop">Upgrade:</span> websocket
+<span class="prop">Connection:</span> Upgrade
+<span class="prop">Sec-WebSocket-Accept:</span> s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+
+<span class="comment">From this point, the connection is no longer HTTP.
+Odoo sends a subscribe frame; the browser acknowledges.
+The server can now push messages at any time.</span></pre>
+  </div>
+
+  <p>The subscribe frame is where Odoo's bus logic connects to the WebSocket transport. The JavaScript <code>bus.service</code> sends a JSON frame listing all the channels the current user cares about — their partner channel, active mail threads, notification channels. The server registers these subscriptions in memory, associated with that WebSocket connection. When a message arrives in <code>bus_bus</code> for any of those channels, the WebSocket worker pushes a frame immediately.</p>
+
+  <div class="divider">· · ·</div>
+
+  <h2>The Kubernetes Wrinkle</h2>
+
+  <p>Anyone who has deployed Odoo 16+ behind an NGINX ingress in Kubernetes has likely hit this: WebSockets silently fail, and Odoo reverts to long polling with no explanation.</p>
+
+  <p>The cause is almost always the ingress stripping the <code>Upgrade</code> and <code>Connection</code> headers from the HTTP request before it reaches the Odoo pod. These headers are hop-by-hop headers — they're meant to be consumed and re-emitted by each proxy in the chain, not forwarded blindly. Many default NGINX configurations strip them entirely.</p>
+
+  <p>Without these headers, the server never sees a WebSocket upgrade request. It sees a regular HTTP request to <code>/websocket</code>, returns a 400 or 404, and the Odoo client quietly falls back to <code>/web/bus/poll</code>. Everything still works. You just never get the benefits of WebSocket, and you'll wonder why your server has hundreds of long-poll connections open at all times.</p>
+
+  <div class="code-wrap">
+    <div class="code-header">nginx ingress — the required annotations <span class="code-lang">YAML</span></div>
+    <pre>annotations:
+  nginx.ingress.kubernetes.io/proxy-read-timeout: <span class="str">"3600"</span>
+  nginx.ingress.kubernetes.io/proxy-send-timeout: <span class="str">"3600"</span>
+  nginx.ingress.kubernetes.io/configuration-snippet: |
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection <span class="str">"upgrade"</span>;</pre>
+  </div>
+
+  <p>The timeout values matter too. A default proxy timeout of 60 seconds will kill any WebSocket connection that hasn't had traffic in a minute, even if both sides are alive and the Odoo heartbeat is configured properly. Setting read and send timeouts to 3600 seconds — one hour — gives the WebSocket connection room to breathe between low-traffic periods.</p>
+
+  <div class="divider">· · ·</div>
+
+  <h2>What This Means for Module Developers</h2>
+
+  <p>The most interesting thing about this entire architecture is what it <em>hides</em>. A developer writing an Odoo module in 2024 doesn't need to know any of this. They call one method:</p>
+
+  <div class="code-wrap">
+    <div class="code-header">Publishing an event from any Odoo module <span class="code-lang">Python</span></div>
+    <pre><span class="comment"># In any Odoo model method:</span>
+<span class="fn">self.env</span>[<span class="str">'bus.bus'</span>]._sendmany([
+    (<span class="str">f'mail.channel/{self.id}'</span>, <span class="str">'new_message'</span>, {
+        <span class="str">'id'</span>: message.id,
+        <span class="str">'body'</span>: message.body,
+        <span class="str">'author'</span>: message.author_id.name,
+    })
+])
+<span class="comment"># That's it. Whether the client is using WebSocket or
+# long poll, it will receive this within milliseconds.</span></pre>
+  </div>
+
+  <p>The transport abstraction is complete. The module developer doesn't know — and doesn't need to know — whether the client receiving this message is connected via WebSocket or long poll. The bus handles it. The history of two decades of web networking evolution is invisible behind a single method call.</p>
+
+  <div class="callout">
+    <div class="callout-icon">◈</div>
+    <p>On the JavaScript side, subscribing is equally simple. Any Owl component or service can call <code>this.env.services.bus_service.subscribe('new_message', handler)</code> on a channel. The bus service manages the WebSocket connection, handles reconnection with exponential back-off, and delivers events to handlers — abstracting the entire transport layer away from the application code.</p>
+  </div>
+
+  <div class="divider">· · ·</div>
+
+  <h2>The Full Picture</h2>
+
+  <p>Here is the complete architecture — browser on the left, server on the right, the bus sitting in the middle of everything.</p>
+
+  <figure style="margin: 2em 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: #fdfcfa;">
+    <div style="background: #0d1b2e; padding: 10px 18px; font-family: var(--sans); font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #5b9bd5;">
+      Odoo real-time architecture
+    </div>
+    <div style="padding: 24px 16px 20px;">
+<svg width="100%" viewBox="0 0 680 560" role="img" xmlns="http://www.w3.org/2000/svg">
+<title>Odoo real-time communication architecture</title>
+<desc>Diagram showing how the browser, im_bus, WebSocket transport, and long-poll fallback relate in Odoo</desc>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- Browser container -->
+<rect x="30" y="30" width="270" height="300" rx="14" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="165" y="56" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#085041">Browser</text>
+
+<!-- Bus service JS -->
+<rect x="52" y="72" width="226" height="52" rx="8" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="165" y="93" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#04342C">Bus service (JS)</text>
+<text x="165" y="112" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#085041">Subscribe to channels, dispatch events</text>
+
+<!-- WS transport -->
+<rect x="52" y="142" width="100" height="52" rx="8" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="102" y="163" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#04342C">WebSocket</text>
+<text x="102" y="180" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#085041">transport</text>
+
+<!-- Long poll transport -->
+<rect x="178" y="142" width="100" height="52" rx="8" fill="#D3D1C7" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="228" y="163" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">Long poll</text>
+<text x="228" y="180" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#444441">fallback</text>
+
+<!-- Heartbeat & reconnect -->
+<rect x="52" y="214" width="226" height="52" rx="8" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="165" y="235" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#04342C">Heartbeat &amp; reconnect</text>
+<text x="165" y="254" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#085041">Ping/pong, exponential back-off</text>
+
+<!-- Components subscribing -->
+<rect x="52" y="286" width="226" height="30" rx="8" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="165" y="305" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#085041">Discuss · Activities · Live-chat · ...</text>
+
+<!-- Server container -->
+<rect x="380" y="30" width="270" height="300" rx="14" fill="#EEEDFE" stroke="#534AB7" stroke-width="0.5"/>
+<text x="515" y="56" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#26215C">Odoo server</text>
+
+<!-- WS controller -->
+<rect x="402" y="72" width="226" height="52" rx="8" fill="#AFA9EC" stroke="#534AB7" stroke-width="0.5"/>
+<text x="515" y="93" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#26215C">WebSocket controller</text>
+<text x="515" y="112" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#3C3489">Upgrade, auth, subscribe channels</text>
+
+<!-- im_bus -->
+<rect x="402" y="142" width="226" height="52" rx="8" fill="#AFA9EC" stroke="#534AB7" stroke-width="0.5"/>
+<text x="515" y="163" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#26215C">im_bus (bus.bus)</text>
+<text x="515" y="180" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#3C3489">Channel pub/sub, DB-backed queue</text>
+
+<!-- Long poll controller -->
+<rect x="402" y="214" width="226" height="52" rx="8" fill="#D3D1C7" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="515" y="235" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">/web/bus/poll</text>
+<text x="515" y="254" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#444441">Legacy HTTP long-poll endpoint</text>
+
+<!-- Publishers -->
+<rect x="402" y="286" width="226" height="30" rx="8" fill="#AFA9EC" stroke="#534AB7" stroke-width="0.5"/>
+<text x="515" y="305" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#3C3489">mail · discuss · notifications · ...</text>
+
+<!-- WS frames arrow (bidirectional) -->
+<line x1="310" y1="168" x2="400" y2="168" stroke="#1D9E75" stroke-width="1.5" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<text x="355" y="158" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#0F6E56">WS frames</text>
+
+<!-- Long poll dashed path -->
+<path d="M228 194 L228 380 L515 380 L515 266" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+<!-- Bus → publishers arrow -->
+<line x1="515" y1="286" x2="515" y2="194" fill="none" stroke="#534AB7" stroke-width="0.5" marker-end="url(#arrow)"/>
+
+<!-- Version badges -->
+<rect x="30" y="348" width="126" height="44" rx="8" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5"/>
+<text x="93" y="366" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#412402">≥ Odoo 16</text>
+<text x="93" y="383" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#633806">WS default</text>
+
+<rect x="174" y="348" width="126" height="44" rx="8" fill="#D3D1C7" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="237" y="366" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">≤ Odoo 15</text>
+<text x="237" y="383" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#444441">Long poll only</text>
+
+<!-- Kubernetes note -->
+<rect x="30" y="410" width="620" height="44" rx="8" fill="#FAECE7" stroke="#993C1D" stroke-width="0.5"/>
+<text x="340" y="428" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="14" font-weight="500" fill="#4A1B0C">Kubernetes / MicroK8s</text>
+<text x="340" y="447" text-anchor="middle" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#712B13">Ingress must pass Upgrade &amp; Connection headers — or WS silently falls back to long poll</text>
+
+<!-- Legend -->
+<rect x="380" y="348" width="12" height="12" rx="2" fill="#9FE1CB" stroke="#0F6E56" stroke-width="0.5"/>
+<text x="398" y="359" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#444">WebSocket path</text>
+<rect x="500" y="348" width="12" height="12" rx="2" fill="#D3D1C7" stroke="#5F5E5A" stroke-width="0.5"/>
+<text x="518" y="359" font-family="Source Sans 3, system-ui, sans-serif" font-size="12" fill="#444">Long-poll path</text>
+</svg>
+    </div>
+    <figcaption style="padding: 10px 18px 14px; font-family: var(--sans); font-size: 13px; color: var(--ink-faint); border-top: 1px solid var(--border);">
+      The browser (left) and server (right) communicate through either WebSocket frames or the long-poll fallback. The im_bus sits at the center of the server side — any module can publish to it; the transport layer handles delivery.
+    </figcaption>
+  </figure>
+
+  <p>What began as a browser limitation — the stateless contract of HTTP — forced an entire industry to get creative. Short polling gave way to long polling. Long polling gave way to WebSocket. Each transition reduced waste, improved latency, and lowered server load. The pattern repeated itself in every major web framework, in every language, across two decades.</p>
+
+  <p>Odoo's journey through this arc was slower than some and more careful than others. The decision to keep the bus as a database table — rather than adopting Redis or RabbitMQ as a message broker — was unusual, even eccentric. But it meant zero additional infrastructure dependencies. It meant events were transactional. It meant any DBA could inspect the message queue with a simple SQL query.</p>
+
+  <p>The decision to build WebSocket as a transport layer on top of the existing bus, rather than replacing the bus entirely, meant that thousands of modules written for the long-poll era continued to work without modification.</p>
+
+  <p>These are not the most glamorous architectural decisions. They won't appear in conference keynotes about distributed systems. But they are the kind of decisions that make a system quietly reliable for the hundreds of thousands of companies that run Odoo in production — and never think about any of this for a single moment.</p>
+
+  <p>Which is, of course, exactly the point.</p>
+
+</article>
+
+<footer>
+  <strong>The Browser That Wouldn't Stop Asking</strong><br>
+  RFC 6455 · im_bus · Odoo 16 · WebSocket internals<br><br>
+  The web's real-time story is still being written.<br>
+  HTTP/3 and QUIC are the next chapter.
+</footer>
+
+</body>
+</html>
